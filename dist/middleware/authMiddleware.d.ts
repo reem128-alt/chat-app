@@ -1,0 +1,2 @@
+export declare const protect: (req: import("../utils/auth").AuthRequest, res: import("express").Response, next: import("express").NextFunction) => Promise<void>;
+//# sourceMappingURL=authMiddleware.d.ts.map
