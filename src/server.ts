@@ -20,13 +20,22 @@ const io = new socketIo.Server(server, {
 });
 
 // Middleware
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "https://chat-app-front-phi.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001"
+].filter(Boolean);
+
 app.use(
   cors({
-    origin:
-      process.env.FRONTEND_URL ||
-      "http://localhost:3000" ||
-      "http://localhost:3001",
-    "https://chat-app-front-phi.vercel.app"
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
