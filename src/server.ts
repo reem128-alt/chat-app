@@ -26,6 +26,7 @@ app.use(
       process.env.FRONTEND_URL ||
       "http://localhost:3000" ||
       "http://localhost:3001",
+    "https://chat-app-front-phi.vercel.app"
     credentials: true,
   })
 );
