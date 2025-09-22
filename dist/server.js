@@ -21,23 +21,27 @@ const io = new socket_io_1.default.Server(server, {
         methods: ["GET", "POST", "PUT", "DELETE"],
     },
 });
-const configuredOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || "")
+const configuredOrigins = (process.env.FRONTEND_URLS ||
+    process.env.FRONTEND_URL ||
+    "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 const allowedOrigins = [
     ...configuredOrigins,
+    process.env.RENDER_EXTERNAL_URL,
+    "https://chat-app-front-phi.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001",
-];
+].filter(Boolean);
+const allowAllCors = String(process.env.CORS_ALLOW_ALL).toLowerCase() === "true";
 const corsOptions = {
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (allowAllCors || !origin || allowedOrigins.includes(origin)) {
             callback(null, true);
+            return;
         }
-        else {
-            callback(new Error("Not allowed by CORS"));
-        }
+        callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

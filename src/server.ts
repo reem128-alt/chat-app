@@ -32,18 +32,23 @@ const configuredOrigins = (
 
 const allowedOrigins = [
   ...configuredOrigins,
+  process.env.RENDER_EXTERNAL_URL,
   "https://chat-app-front-phi.vercel.app",
   "http://localhost:3000",
   "http://localhost:3001",
-];
+].filter(Boolean) as string[];
+
+// Allow all origins when explicitly enabled (useful on Render during previews)
+const allowAllCors: boolean =
+  String(process.env.CORS_ALLOW_ALL).toLowerCase() === "true";
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (allowAllCors || !origin || allowedOrigins.includes(origin)) {
       callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+      return;
     }
+    callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
