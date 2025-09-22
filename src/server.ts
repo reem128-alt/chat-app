@@ -32,7 +32,7 @@ const configuredOrigins = (
 
 const allowedOrigins = [
   ...configuredOrigins,
-  "https://chat-app-front-phi.vercel.app/login",
+  "https://chat-app-front-phi.vercel.app",
   "http://localhost:3000",
   "http://localhost:3001",
 ];
