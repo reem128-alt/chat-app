@@ -30,6 +30,13 @@ const configuredOrigins = (
   .map((s) => s.trim())
   .filter(Boolean);
 
+const allowedOrigins = [
+  ...configuredOrigins,
+  "https://chat-app-front-phi.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
+
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -46,25 +53,7 @@ const corsOptions: cors.CorsOptions = {
 app.use(cors(corsOptions));
 // Handle preflight requests
 app.options("*", cors(corsOptions));
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "https://chat-app-front-phi.vercel.app",
-  "http://localhost:3000",
-  "http://localhost:3001",
-].filter(Boolean);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), "public")));
 
