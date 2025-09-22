@@ -15,20 +15,43 @@ const server = http.createServer(app);
 const io = new socketIo.Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
 
 // Middleware
-app.use(
-  cors({
-    origin:
-      process.env.FRONTEND_URL ||
-      "http://localhost:3000" ||
-      "http://localhost:3001",
-    credentials: true,
-  })
-);
+// Support single or comma-separated list of frontend origins via FRONTEND_URL or FRONTEND_URLS
+const configuredOrigins = (
+  process.env.FRONTEND_URLS ||
+  process.env.FRONTEND_URL ||
+  ""
+)
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const allowedOrigins = [
+  ...configuredOrigins,
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+// Handle preflight requests
+app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), "public")));
 

@@ -18,15 +18,33 @@ const server = http_1.default.createServer(app);
 const io = new socket_io_1.default.Server(server, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"],
+        methods: ["GET", "POST", "PUT", "DELETE"],
     },
 });
-app.use((0, cors_1.default)({
-    origin: process.env.FRONTEND_URL ||
-        "http://localhost:3000" ||
-        "http://localhost:3001",
+const configuredOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+const allowedOrigins = [
+    ...configuredOrigins,
+    "http://localhost:3000",
+    "http://localhost:3001",
+];
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true,
-}));
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+};
+app.use((0, cors_1.default)(corsOptions));
+app.options("*", (0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());
 app.use(express_1.default.static(path_1.default.join(process.cwd(), "public")));
 app.get("/", (req, res) => {
